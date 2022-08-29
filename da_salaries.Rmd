@@ -43,13 +43,47 @@ str(ds_salaries)
 
 class(ds_salaries$job_title)
 
+
 ```
 
 
 
+```{r}
+salaies <- ds_salaries %>%
+  select(X,work_year,salary,salary_in_usd,remote_ratio)
+
+```
+
+
+```{r}
+summary(salaies)
+```
 
 
 
+```{r fig.width= 5}
+
+ds_salaries %>%
+  filter(work_year %in% c(2020, 2021)) %>%
+  filter(employment_type %in% c("FL","FT")) %>%
+  group_by(job_title) %>%
+  summarise(meansalary = mean(salary_in_usd)) %>%
+  ggplot(aes(x = reorder(job_title, -meansalary), y = meansalary / 10000)) +
+  geom_col(fill = "red") +
+  xlab("job title") +
+  ylab("mean salary(in 10K)") +
+  ggtitle("mean salary by job title") +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust= 1 )) +
+  coord_flip()
+  
+
+```
 
 
+```{r}
+
+
+
+```
 
