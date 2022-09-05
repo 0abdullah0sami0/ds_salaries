@@ -27,6 +27,7 @@ knitr::opts_chunk$set(echo = TRUE,
 # libraries
 library(tidyverse)
 library(knitr)
+library(ggExtra)
 ```
 
 
@@ -81,9 +82,24 @@ ds_salaries %>%
 ```
 
 
+
+
+```{r}
+ds_salaries %>%
+  filter(experience_level == "MI") %>%
+  filter(remote_ratio == 100) %>%
+  group_by(company_location) %>%
+  summarise(rows = n()) %>%
+  ggplot(aes(x = rows, y = company_location)) +
+  geom_col(fill = "blue", width = 0.6 ) +
+  theme_bw() +
+  removeGrid()
+  
+```
+
 ```{r}
 
-
+installed.packages()
 
 ```
 
