@@ -90,10 +90,14 @@ ds_salaries %>%
   filter(remote_ratio == 100) %>%
   group_by(company_location) %>%
   summarise(rows = n()) %>%
-  ggplot(aes(x = rows, y = company_location)) +
-  geom_col(fill = "blue", width = 0.6 ) +
+  ggplot(aes(x = rows, y = reorder(company_location, -rows))) +
+  geom_col(fill = "blue", width = 0.9 ) +
   theme_bw() +
-  removeGrid()
+  removeGrid() +
+  geom_text(aes(label = rows),hjust = -0.1) +
+  labs(title = "Number of employees with experience level MI & remote ratio 100% \nin each company location", subtitle = "bar plot", caption = "Source: Kaggle") +
+  xlab("Count") +
+  ylab("company location") 
   
 ```
 
@@ -101,5 +105,22 @@ ds_salaries %>%
 
 installed.packages()
 
+```
+
+
+```{r fig.height = 5}
+ds_salaries %>%
+  filter(remote_ratio == 100) %>%
+
+  ggplot(aes(x = company_location)) +
+  geom_bar(aes(fill = experience_level ), width = 0.9, position = "dodge") +
+  theme_bw() +
+  removeGrid() +
+  # geom_text(aes(label = rows),hjust = -0.1) +
+  labs(title = "Number of employees with experience level MI & remote ratio 100% \nin each company location", subtitle = "bar plot", caption = "Source: Kaggle") +
+  ylab("Count") +
+  xlab("company location") + 
+  theme(legend.position = "bottom") +
+  facet_wrap(~experience_level)
 ```
 
