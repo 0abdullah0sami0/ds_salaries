@@ -126,3 +126,27 @@ ds_salaries %>%
              aes(y =..count.., label = ..count..),vjust = -0.5) 
 ```
 
+
+```{r}
+
+ds_salaries$salaryKUSD <- ds_salaries$salary_in_usd/1000
+
+ds_salaries %>%
+  filter(job_title == "Data Scientist") %>%
+  group_by(work_year) %>%
+  summarise(meanSalary = mean(salaryKUSD)) %>%
+  mutate(work_year = as.Date(paste0(work_year,"-01-01"), format = "%Y-%m-%d")) %>%
+  
+  ggplot( aes(x= work_year, y= meanSalary)) +
+    geom_line(linetype = "dashed") +
+    geom_point() +
+  scale_x_date(date_breaks = "1 year",
+             date_labels = "%Y") +
+  labs(title = "mean Salary by year for data Scientist", subtitle = "line chart", caption = "Source: Kaggle") +
+  ylab("mean Salary in (KUSD)") +
+  xlab("Work Year") +
+  geom_text(aes(label = round(meanSalary,4)),vjust = -0.3) +
+  theme_light()
+
+```
+
