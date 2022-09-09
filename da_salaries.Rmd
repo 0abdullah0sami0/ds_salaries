@@ -117,10 +117,12 @@ ds_salaries %>%
   theme_bw() +
   removeGrid() +
   # geom_text(aes(label = rows),hjust = -0.1) +
-  labs(title = "Number of employees with experience level MI & remote ratio 100% \nin each company location", subtitle = "bar plot", caption = "Source: Kaggle") +
+  labs(title = "Number of employees with  remote ratio 100% \nin each company location", subtitle = "bar plot", caption = "Source: Kaggle") +
   ylab("Count") +
   xlab("company location") + 
   theme(legend.position = "bottom") +
-  facet_wrap(~experience_level)
+  facet_wrap(~experience_level,scales = "free") +
+  stat_count(geom = "text",
+             aes(y =..count.., label = ..count..),vjust = -0.5) 
 ```
 
