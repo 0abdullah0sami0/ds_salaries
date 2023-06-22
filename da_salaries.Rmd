@@ -1,5 +1,5 @@
 ---
-title: "ds salaries"
+title: "Data scientists Salaries Analysis"
 subtitle: "Project report"
 author: "abdullah sami"
 output:
@@ -9,8 +9,6 @@ output:
     toc_float: yes
     highlight: zenburn
     df_print: paged
-  word_document:
-    toc: yes
   pdf_document:
     toc: yes
 date: "`r Sys.Date()`"
@@ -30,123 +28,146 @@ library(knitr)
 library(ggExtra)
 ```
 
+# Data description
 
 ```{r}
 ds_salaries <- read.csv("ds_salaries.csv")
-
-ds_salaries
-
-View(ds_salaries)
-
 summary(ds_salaries)
-
 str(ds_salaries)
-
-class(ds_salaries$job_title)
-
-
 ```
 
+# Exploratory data analysis
 
-
-```{r}
-salaies <- ds_salaries %>%
-  select(X,work_year,salary,salary_in_usd,remote_ratio)
-
-```
-
-
-```{r}
-summary(salaies)
-```
-
-
-
-```{r fig.width= 5}
-
+```{r fig.width = 10, fig.height=8}
 ds_salaries %>%
-  filter(work_year %in% c(2020, 2021)) %>%
-  filter(employment_type %in% c("FL","FT")) %>%
+  filter(work_year %in% c(2020, 2021) & employment_type %in% c("FL","FT")) %>%
   group_by(job_title) %>%
   summarise(meansalary = mean(salary_in_usd)) %>%
   ggplot(aes(x = reorder(job_title, -meansalary), y = meansalary / 10000)) +
-  geom_col(fill = "red") +
-  xlab("job title") +
-  ylab("mean salary(in 10K)") +
-  ggtitle("mean salary by job title") +
+  geom_col(fill = "#005f73") +
+  xlab("Job title") +
+  ylab("Mean salary(in 10K)") +
+  ggtitle("Mean salary by job title") +
   theme_light() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust= 1 )) +
-  coord_flip()
-  
-
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1 )) +
+  coord_flip() +
+  removeGrid() +
+  geom_text(aes(label = round(meansalary/10000)),hjust = -0.1) +
+  labs(caption = "Source: Kaggle")
 ```
 
-
-
-
-```{r}
+```{r fig.width = 10}
 ds_salaries %>%
-  filter(experience_level == "MI") %>%
-  filter(remote_ratio == 100) %>%
+  filter(experience_level == "MI" & remote_ratio == 100) %>%
   group_by(company_location) %>%
   summarise(rows = n()) %>%
   ggplot(aes(x = rows, y = reorder(company_location, -rows))) +
-  geom_col(fill = "blue", width = 0.9 ) +
-  theme_bw() +
+  geom_col(fill = "#0a9396") +
+  theme_light() +
   removeGrid() +
   geom_text(aes(label = rows),hjust = -0.1) +
-  labs(title = "Number of employees with experience level MI & remote ratio 100% \nin each company location", subtitle = "bar plot", caption = "Source: Kaggle") +
+  labs(title = "Number of employees in each company location", subtitle = "Employees with experience level MI & remote ratio 100%", caption = "Source: Kaggle") +
   xlab("Count") +
-  ylab("company location") 
-  
-```
-
-```{r}
-
-installed.packages()
-
+  ylab("Company location") 
 ```
 
 
-```{r fig.height = 5}
+```{r fig.width = 10, fig.height = 10}
 ds_salaries %>%
   filter(remote_ratio == 100) %>%
-
   ggplot(aes(x = company_location)) +
   geom_bar(aes(fill = experience_level ), width = 0.9, position = "dodge") +
-  theme_bw() +
+  scale_fill_manual(values = c("#005f73","#0a9396","#94d2bd","#e9d8a6")) +
+  theme_light() +
   removeGrid() +
-  # geom_text(aes(label = rows),hjust = -0.1) +
-  labs(title = "Number of employees with  remote ratio 100% \nin each company location", subtitle = "bar plot", caption = "Source: Kaggle") +
+  labs(title = "Number of employees in each company location by experience level", subtitle = "Employees with remote ratio 100%", caption = "Source: Kaggle") +
   ylab("Count") +
-  xlab("company location") + 
-  theme(legend.position = "bottom") +
+  xlab("Company location") +
+  theme(legend.position = "none") +
   facet_wrap(~experience_level,scales = "free") +
   stat_count(geom = "text",
-             aes(y =..count.., label = ..count..),vjust = -0.5) 
+             aes(y = after_stat(count), label = after_stat(count)),vjust = -0.5)
 ```
 
-
 ```{r}
-
 ds_salaries$salaryKUSD <- ds_salaries$salary_in_usd/1000
-
 ds_salaries %>%
   filter(job_title == "Data Scientist") %>%
   group_by(work_year) %>%
   summarise(meanSalary = mean(salaryKUSD)) %>%
   mutate(work_year = as.Date(paste0(work_year,"-01-01"), format = "%Y-%m-%d")) %>%
-  
   ggplot( aes(x= work_year, y= meanSalary)) +
     geom_line(linetype = "dashed") +
     geom_point() +
   scale_x_date(date_breaks = "1 year",
              date_labels = "%Y") +
-  labs(title = "mean Salary by year for data Scientist", subtitle = "line chart", caption = "Source: Kaggle") +
-  ylab("mean Salary in (KUSD)") +
+  labs(title = "Mean Salary by year", subtitle = "Employees with job title Data Scientist", caption = "Source: Kaggle") +
+  ylab("Mean Salary in (KUSD)") +
   xlab("Work Year") +
-  geom_text(aes(label = round(meanSalary,4)),vjust = -0.3) +
+  geom_text(aes(label = round(meanSalary)),vjust = -0.3) +
   theme_light()
+```
 
+```{r fig.width= 10}
+ds_salaries$salaryKUSD <- ds_salaries$salary_in_usd/1000
+ds_salaries %>%
+  mutate(work_year = as.Date(paste0(work_year,"-01-01"), format = "%Y-%m-%d"),
+         cat = ifelse(grepl("Machine Learning",job_title),"Machine Learning",
+                      ifelse(grepl("Data Scien",job_title),"Data Science",
+                             ifelse(grepl("Data Analy",job_title),"Data Analytics","Other")
+                             )
+                      )
+         ) %>%
+  group_by(work_year,cat) %>%
+  summarise(meanSalary = mean(salaryKUSD)) %>%
+  
+  ggplot( aes(x= work_year, y= meanSalary,color = cat)) +
+  scale_color_manual(values = c("#005f73","#0a9396","#94d2bd","#e9d8a6")) +
+  geom_line(linetype = "dashed") +
+    geom_point() +
+  scale_x_date(date_breaks = "1 year",
+             date_labels = "%Y") +
+  labs(title = "Mean salary by year for each job category", caption = "Source: Kaggle") +
+  ylab("Mean Salary in (KUSD)") +
+  xlab("Work Year") +
+  geom_text(aes(label = round(meanSalary)),vjust = -0.1) +
+   theme_light() +
+   theme(legend.position = "none") +
+  facet_wrap(~cat)
+```
+
+```{r, fig.width=10}
+ds_salaries %>%
+  filter(work_year == 2022) %>%
+  group_by(employee_residence) %>%
+  summarise(aaa = n(),meanslary = mean(salary_in_usd)) %>%
+
+  ggplot(aes(x = reorder(employee_residence , -meanslary), y = meanslary/10000)) +
+  geom_col(col= "white",fill="#94d2bd") +
+  labs(title = "Mean salary by employee residence", subtitle = "Year: 2022",caption = "source: kaggle") +
+  xlab("Employee residence") +
+  ylab("Mean salary (in 10k USD)") +
+  geom_text(aes(label = round(meanslary/10000)), vjust = .5,hjust = - 0.3) +
+  removeGrid() +
+  coord_flip() +
+  theme_light() +
+  removeGrid()
+```
+
+```{r}
+ds_salaries %>% 
+  group_by(remote_ratio) %>%
+  filter(job_title == "Data Scientist") %>%
+  summarise(count = n(), meansalary = mean(salaryKUSD)) %>%
+  
+  ggplot(aes(y = meansalary,x = remote_ratio)) +
+  geom_segment(aes(yend = 0, xend = remote_ratio)) +
+  geom_point(size = 4 , color = "#e9d8a6") +
+  ylab("Mean salary (KUSD)")+
+  xlab("Remote ratio") +
+  geom_text(aes(label = paste("Count\n",count))) +
+  labs(title = "Number of employees and their mean salary by remote work ratio",subtitle = "Job title: Data Scientist",caption = "Source: Kaggle") +
+  theme_light() +
+  removeGrid()
 ```
 
